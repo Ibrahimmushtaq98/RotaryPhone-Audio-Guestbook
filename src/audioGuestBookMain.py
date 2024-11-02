@@ -7,16 +7,6 @@ from datetime import datetime
 import configparser
 import time
 
-import logging
-
-# Set up logging
-logging.basicConfig(
-    filename='/home/rpi/RotaryPhone-Audio-Guestbook/logs/guestbook_app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-
 class SimplePhoneSystem:
     def __init__(self, config_file='config.ini'):
         # Load configuration
@@ -46,7 +36,7 @@ class SimplePhoneSystem:
         self.plunger.when_pressed = self.handle_handset_lifted
         self.plunger.when_released = self.handle_handset_down
 
-        logging.info("System initialized. Monitoring handset position for audio recording and playback.")
+        print("System initialized. Monitoring handset position for audio recording and playback.")
 
     def generate_filename(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -55,7 +45,7 @@ class SimplePhoneSystem:
     def handle_handset_lifted(self):
         if not self.handset_lifted_state:
             self.handset_lifted_state = True
-            logging.info("Handset lifted. Playing greeting message...")
+            print("Handset lifted. Playing greeting message...")
 
             # Start a thread for the greeting
             self.greeting_thread = threading.Thread(target=self.play_greeting)
@@ -64,7 +54,7 @@ class SimplePhoneSystem:
     def handle_handset_down(self):
         if self.handset_lifted_state:
             self.handset_lifted_state = False
-            logging.info("Handset placed down. Stopping any ongoing playback and recording.")
+            print("Handset placed down. Stopping any ongoing playback and recording.")
 
             # Stop the greeting and recording if they are running
             if self.greeting_thread and self.greeting_thread.is_alive():
@@ -84,15 +74,15 @@ class SimplePhoneSystem:
 
         # Start recording only if the handset is still lifted after greeting finishes
         if self.handset_lifted_state:
-            logging.info("Greeting finished. Starting recording...")
+            print("Greeting finished. Starting recording...")
             self.recording_thread = threading.Thread(target=self.start_recording)
             self.recording_thread.start()
 
     def start_recording(self):
-        # Set the microphone capture volume to 5%
-        print("Setting microphone volume to 5%")
-        subprocess.run(["amixer", "-c", "0", "set", "Mic", "5%"])
-        
+        # Set the capture volume to 50%
+        print("Setting capture volume to 50%")
+        subprocess.run(["amixer", "set", "Mic Capture Volume", "50%"])
+
         # Record the audio message
         recording_file = self.generate_filename()
         self.recording_process = subprocess.Popen([
@@ -100,17 +90,14 @@ class SimplePhoneSystem:
         ])
         self.recording_process.wait()
 
-    def stop_recording(self):
-        if self.recording_process and self.recording_process.poll() is None:
-            self.recording_process.terminate()
-            time.sleep(0.1)  # Short delay for graceful termination
-            self.recording_process.wait()
-            self.recording_process = None
-            logging.info("Recording stopped.")
+    def stop_greeting(self):
+        # Attempt to terminate the greeting process if it's running
+        print("Stopping greeting message...")
+        subprocess.run(["pkill", "-f", "aplay"])
 
     def stop_recording(self):
         # Attempt to terminate the recording process if it's running
-        logging.info("Stopping recording...")
+        print("Stopping recording...")
         subprocess.run(["pkill", "-f", "arecord"])
 
 # Run the program
