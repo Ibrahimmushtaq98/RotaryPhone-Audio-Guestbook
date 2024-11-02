@@ -1,7 +1,7 @@
 import logging
 import threading
 import subprocess
-import datetime
+from datetime import datetime
 import time
 import signal
 import os
@@ -18,6 +18,7 @@ class AudioGuesBookRotaryPhone:
         # Load configuration
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
+        print("Config sections:", self.config.sections())
 
         # Audio settings
         self.recording_limit = int(self.config['Audio']['recording_limit'])
@@ -57,16 +58,15 @@ class AudioGuesBookRotaryPhone:
             "arecord", "-f", self.recording_format, "-d", str(self.recording_limit), recording_file
         ])
 
-    # Handset down - stop recording and playback
     def handset_down(self):
         if self.recording_process:
             self.recording_process.terminate()
+            self.recording_process.wait()  # Ensure the recording process has fully stopped
             self.recording_process = None
-            print("Handset is placed down. Stopping recording and playing back...")
-            subprocess.run(["aplay", self.generate_filename()])
+            print("Handset is placed down. Recording has stopped.")
 
 # Run the program
 if __name__ == "__main__":
-    phone_system = AudioGuesBookRotaryPhone("../config.ini")
+    phone_system = AudioGuesBookRotaryPhone("./config.ini")
     pause()  # Keep the program running to monitor plunger state
 
