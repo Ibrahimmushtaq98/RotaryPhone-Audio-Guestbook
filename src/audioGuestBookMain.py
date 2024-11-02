@@ -67,6 +67,6 @@ class AudioGuesBookRotaryPhone:
 
 # Run the program
 if __name__ == "__main__":
-    phone_system = AudioGuesBookRotaryPhone()
+    phone_system = AudioGuesBookRotaryPhone("../config.ini")
     pause()  # Keep the program running to monitor plunger state
 
