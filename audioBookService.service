@@ -1,0 +1,15 @@
+[Unit]
+Description=Rotary Phone Guest Book Project
+After=multi-user.target
+
+[Service]
+WorkingDirectory=/home/rpi/RotaryPhone-Audio-Guestbook/
+ExecStart=/usr/bin/python3 /home/rpi/RotaryPhone-Audio-Guestbook/src/audioGuestBookMain.py
+Type=simple
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/rpi/RotaryPhone-Audio-Guestbook/logs/guestbook.log
+StandardError=append:/home/rpi/RotaryPhone-Audio-Guestbook/logs/guestbook_error.log
+
+[Install]
+WantedBy=multi-user.target
